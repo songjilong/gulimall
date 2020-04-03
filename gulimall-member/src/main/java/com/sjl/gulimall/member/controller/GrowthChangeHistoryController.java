@@ -3,6 +3,8 @@ package com.sjl.gulimall.member.controller;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.sjl.gulimall.member.entity.MemberEntity;
+import com.sjl.gulimall.member.feign.CouponFeignService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,6 +31,17 @@ import com.sjl.common.utils.R;
 public class GrowthChangeHistoryController {
     @Autowired
     private GrowthChangeHistoryService growthChangeHistoryService;
+
+    @Autowired
+    private CouponFeignService couponFeignService;
+
+    @RequestMapping("/coupon")
+    public R getMemberCoupon(){
+        MemberEntity memberEntity = new MemberEntity();
+        memberEntity.setUsername("张明");
+        R r = couponFeignService.memberCoupons();
+        return R.ok().put("member", memberEntity).put("coupon", r.get("coupon"));
+    }
 
     /**
      * 列表

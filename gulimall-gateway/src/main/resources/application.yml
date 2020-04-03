@@ -1,0 +1,17 @@
+server:
+  port: 88
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+    gateway:
+      routes:
+        - id: test_baidu
+          uri: https://www.baidu.com
+          predicates:
+            - Query=query,baidu
+        - id: test_qq
+          uri: https://www.qq.com
+          predicates:
+            - Query=query,qq
