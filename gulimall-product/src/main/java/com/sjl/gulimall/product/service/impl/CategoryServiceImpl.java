@@ -48,6 +48,17 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     }
 
     /**
+     * 批量删除
+     * @param asList
+     */
+    @Override
+    public void removeMenuByIds(List<Long> asList) {
+        //TODO 删除前先判断是否有被关联的数据
+        //逻辑删除
+        baseMapper.deleteBatchIds(asList);
+    }
+
+    /**
      * 递归查询出所有菜单的子分类
      * @param root 父分类
      * @param all 所有的数据

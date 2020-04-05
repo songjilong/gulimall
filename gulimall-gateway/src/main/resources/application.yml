@@ -11,7 +11,23 @@ spring:
           uri: https://www.baidu.com
           predicates:
             - Query=query,baidu
+
         - id: test_qq
           uri: https://www.qq.com
           predicates:
             - Query=query,qq
+            
+# http://localhost:88/api/product/category/list/tree => http://localhost:10000/product/category/list/tree
+        - id: product_route
+          uri: lb://gulimall-product
+          predicates:
+            - Path=/api/product/**
+          filters:
+            - RewritePath=/api/(?<segment>/?.*), /$\{segment}
+
+        - id: admin_route
+          uri: lb://renren-fast
+          predicates:
+            - Path=/api/**
+          filters:
+            - RewritePath=/api/(?<segment>/?.*), /renren-fast/$\{segment}
