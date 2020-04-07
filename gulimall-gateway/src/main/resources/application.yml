@@ -7,16 +7,6 @@ spring:
         server-addr: 127.0.0.1:8848
     gateway:
       routes:
-        - id: test_baidu
-          uri: https://www.baidu.com
-          predicates:
-            - Query=query,baidu
-
-        - id: test_qq
-          uri: https://www.qq.com
-          predicates:
-            - Query=query,qq
-            
 # http://localhost:88/api/product/category/list/tree => http://localhost:10000/product/category/list/tree
         - id: product_route
           uri: lb://gulimall-product
@@ -24,6 +14,13 @@ spring:
             - Path=/api/product/**
           filters:
             - RewritePath=/api/(?<segment>/?.*), /$\{segment}
+
+        - id: third_party_route
+          uri: lb://gulimall-third-party
+          predicates:
+            - Path=/api/thirdparty/**
+          filters:
+            - RewritePath=/api/thirdparty/(?<segment>/?.*), /$\{segment}
 
         - id: admin_route
           uri: lb://renren-fast
