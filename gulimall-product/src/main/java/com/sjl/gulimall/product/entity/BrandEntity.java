@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.sjl.common.valid.ListValue;
 import com.sjl.common.valid.SaveGroup;
 import com.sjl.common.valid.UpdateGroup;
+import com.sjl.common.valid.UpdateStatusGroup;
 import lombok.Data;
 import org.hibernate.validator.constraints.Range;
 import org.hibernate.validator.constraints.URL;
@@ -29,7 +31,7 @@ public class BrandEntity implements Serializable {
     /**
      * 品牌id
      */
-    @NotNull(message = "品牌id不能为空", groups = UpdateGroup.class)
+    @NotNull(message = "品牌id不能为空", groups = {UpdateGroup.class, UpdateStatusGroup.class})
     @Null(message = "品牌id必须为空", groups = SaveGroup.class)
     @TableId
     private Long brandId;
@@ -52,8 +54,8 @@ public class BrandEntity implements Serializable {
     /**
      * 显示状态[0-不显示；1-显示]
      */
-    @NotNull(message = "显示状态不能为空", groups = SaveGroup.class)
-    @Range(min = 0, max = 1, message = "显示状态必须为0或1，0：不显示；1：显示", groups = {SaveGroup.class, UpdateGroup.class})
+    @NotNull(message = "显示状态不能为空", groups = {SaveGroup.class, UpdateStatusGroup.class})
+    @ListValue(vals = {0, 1}, groups = {SaveGroup.class, UpdateGroup.class, UpdateStatusGroup.class})
     private Integer showStatus;
     /**
      * 检索首字母

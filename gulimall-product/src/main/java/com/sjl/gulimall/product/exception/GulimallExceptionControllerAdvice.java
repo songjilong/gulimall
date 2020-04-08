@@ -20,10 +20,10 @@ import java.util.Map;
 public class GulimallExceptionControllerAdvice {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public R handleValidException(MethodArgumentNotValidException e){
-        log.error("数据校验出现问题{},异常类型{}",e.getMessage(),e.getClass());
+    public R handleValidException(MethodArgumentNotValidException e) {
+        log.error("数据校验出现问题{},异常类型{}", e.getMessage(), e.getClass());
         BindingResult bindingResult = e.getBindingResult();
-        Map<String,String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>();
         bindingResult.getFieldErrors().forEach(error -> {
             map.put(error.getField(), error.getDefaultMessage());
         });
@@ -31,7 +31,8 @@ public class GulimallExceptionControllerAdvice {
     }
 
     @ExceptionHandler(Throwable.class)
-    public R handleException(Throwable t){
+    public R handleException(Throwable t) {
+        log.error("系统异常" + t);
         return R.error(BizCodeEnum.UNKNOW_EXCEPTION.getCode(), BizCodeEnum.UNKNOW_EXCEPTION.getMsg());
     }
 }
