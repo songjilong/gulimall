@@ -1,6 +1,8 @@
 package com.sjl.gulimall.product.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.sjl.gulimall.product.dao.AttrAttrgroupRelationDao;
+import com.sjl.gulimall.product.dao.AttrGroupDao;
 import com.sjl.gulimall.product.entity.AttrAttrgroupRelationEntity;
 import com.sjl.gulimall.product.entity.AttrGroupEntity;
 import com.sjl.gulimall.product.entity.CategoryEntity;
@@ -60,7 +62,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         //保存关联表信息
         AttrAttrgroupRelationEntity relationEntity = new AttrAttrgroupRelationEntity();
         //查出属性id
-        relationEntity.setAttrId(this.getOne(new QueryWrapper<>(attrEntity)).getAttrId());
+        relationEntity.setAttrId(attrEntity.getAttrId());
         relationEntity.setAttrGroupId(attrVo.getAttrGroupId());
         attrAttrgroupRelationService.save(relationEntity);
     }
@@ -70,10 +72,10 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         QueryWrapper<AttrEntity> queryWrapper = new QueryWrapper<>();
 
         String key = (String) params.get("key");
-        if(StringUtils.isNotBlank(key)){
+        if (StringUtils.isNotBlank(key)) {
             queryWrapper.and(wrapper -> wrapper.eq("attr_id", key).or().like("attr_name", key));
         }
-        if(catelogId != 0){
+        if (catelogId != 0) {
             queryWrapper.eq("catelog_id", catelogId);
         }
         IPage<AttrEntity> page = this.page(new Query<AttrEntity>().getPage(params), queryWrapper);
@@ -87,12 +89,12 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
             BeanUtils.copyProperties(attrEntity, attrRespVo);
             //设置分类名字
             CategoryEntity categoryEntity = categoryService.getById(attrRespVo.getCatelogId());
-            if(categoryEntity != null){
+            if (categoryEntity != null) {
                 attrRespVo.setCatelogName(categoryEntity.getName());
             }
             //设置分组名字
             AttrAttrgroupRelationEntity relationEntity = attrAttrgroupRelationService.getOne(new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", attrRespVo.getAttrId()));
-            if(relationEntity != null){
+            if (relationEntity != null && relationEntity.getAttrGroupId() != null) {
                 AttrGroupEntity attrGroupEntity = attrGroupService.getById(relationEntity.getAttrGroupId());
                 attrRespVo.setGroupName(attrGroupEntity.getAttrGroupName());
             }
@@ -102,6 +104,39 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
 
         pageUtils.setList(records);
         return pageUtils;
+    }
+
+    @Override
+    public AttrRespVo getAttrInfo(Long attrId) {
+        //查出基本信息
+        AttrEntity attrEntity = this.getById(attrId);
+        AttrRespVo attrRespVo = new AttrRespVo();
+        BeanUtils.copyProperties(attrEntity, attrRespVo);
+
+        //设置attrGroupId
+        AttrAttrgroupRelationEntity attrAttrgroupRelationEntity = attrAttrgroupRelationService.getOne(new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", attrId));
+        if (attrAttrgroupRelationEntity != null) {
+            attrRespVo.setAttrGroupId(attrAttrgroupRelationEntity.getAttrGroupId());
+
+        }
+        //设置catelogPath
+        Long[] catelogPath = categoryService.findCatelogPath(attrEntity.getCatelogId());
+        attrRespVo.setCatelogPath(catelogPath);
+
+        return attrRespVo;
+    }
+
+    @Override
+    @Transactional
+    public void updateAttr(AttrVo attrVo) {
+        AttrEntity attrEntity = new AttrEntity();
+        BeanUtils.copyProperties(attrVo, attrEntity);
+        //更新基本属性
+        this.updateById(attrEntity);
+        //更新级联属性
+        AttrAttrgroupRelationEntity attrAttrgroupRelationEntity = new AttrAttrgroupRelationEntity();
+        attrAttrgroupRelationEntity.setAttrGroupId(attrVo.getAttrGroupId());
+        attrAttrgroupRelationService.update(attrAttrgroupRelationEntity,new UpdateWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", attrVo.getAttrId()));
     }
 
 }
