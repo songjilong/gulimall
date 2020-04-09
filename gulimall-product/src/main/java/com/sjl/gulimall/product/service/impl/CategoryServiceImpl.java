@@ -1,5 +1,10 @@
 package com.sjl.gulimall.product.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.sjl.gulimall.product.entity.CategoryBrandRelationEntity;
+import com.sjl.gulimall.product.service.CategoryBrandRelationService;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -14,11 +19,15 @@ import com.sjl.common.utils.Query;
 import com.sjl.gulimall.product.dao.CategoryDao;
 import com.sjl.gulimall.product.entity.CategoryEntity;
 import com.sjl.gulimall.product.service.CategoryService;
+import org.springframework.transaction.annotation.Transactional;
 import sun.rmi.runtime.Log;
 
 
 @Service("categoryService")
 public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity> implements CategoryService {
+
+    @Autowired
+    private CategoryBrandRelationService categoryBrandRelationService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -68,6 +77,14 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         List<Long> list = getCatelogPath(catelogId, new ArrayList<>());
         Collections.reverse(list);
         return list.toArray(new Long[0]);
+    }
+
+    @Override
+    @Transactional
+    public void updateCascade(CategoryEntity category) {
+        this.updateById(category);
+        //TODO 更新关联表的信息
+        categoryBrandRelationService.updateCategory(category.getCatId(), category.getName());
     }
 
     /**
