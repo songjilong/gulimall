@@ -32,19 +32,18 @@ public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEnt
     @Override
     public PageUtils queryPage(Map<String, Object> params, Long catelogId) {
         IPage<AttrGroupEntity> page;
+        QueryWrapper<AttrGroupEntity> wrapper = new QueryWrapper<>();
+        //如果key不为空，再加上 key 的查询条件
+        String key = (String) params.get("key");
+        if (StringUtils.isNotBlank(key)) {
+            wrapper.and(obj -> obj.eq("attr_group_id", key).or().like("attr_group_name", key));
+        }
         if (catelogId == 0) {
             //查询所有
-            page = this.page(new Query<AttrGroupEntity>().getPage(params),
-                    new QueryWrapper<>());
+            page = this.page(new Query<AttrGroupEntity>().getPage(params), wrapper);
         } else {
-            QueryWrapper<AttrGroupEntity> wrapper = new QueryWrapper<>();
             //根据 catelogId 查询
             wrapper.eq("catelog_id", catelogId);
-            //如果key不为空，再加上 key 的查询条件
-            String key = (String) params.get("key");
-            if (StringUtils.isNotBlank(key)) {
-                wrapper.and(obj -> obj.eq("attr_group_id", key).or().like("attr_group_name", key));
-            }
             page = this.page(new Query<AttrGroupEntity>().getPage(params), wrapper);
         }
         return new PageUtils(page);
