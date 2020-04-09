@@ -2,9 +2,7 @@ package com.sjl.gulimall.product.service.impl;
 
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -16,6 +14,7 @@ import com.sjl.common.utils.Query;
 import com.sjl.gulimall.product.dao.CategoryDao;
 import com.sjl.gulimall.product.entity.CategoryEntity;
 import com.sjl.gulimall.product.service.CategoryService;
+import sun.rmi.runtime.Log;
 
 
 @Service("categoryService")
@@ -56,6 +55,34 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         //TODO 删除前先判断是否有被关联的数据
         //逻辑删除
         baseMapper.deleteBatchIds(asList);
+    }
+
+    /**
+     * 找到指定分类id的完整三级分类路径 [父、子、孙]
+     * e.g.[2, 25, 225]
+     * @param catelogId 当前id
+     * @return 完整路径
+     */
+    @Override
+    public Long[] findCatelogPath(Long catelogId) {
+        List<Long> list = getCatelogPath(catelogId, new ArrayList<>());
+        Collections.reverse(list);
+        return list.toArray(new Long[0]);
+    }
+
+    /**
+     * 递归查找当前分类id的父id
+     * @param catelogId 当前id
+     * @param list 存储结果的集合
+     * @return 完整路径的倒序
+     */
+    private List<Long> getCatelogPath(Long catelogId, List<Long> list){
+        list.add(catelogId);
+        CategoryEntity ce = this.getById(catelogId);
+        if(ce.getParentCid() != 0){
+            getCatelogPath(ce.getParentCid(), list);
+        }
+        return list;
     }
 
     /**
