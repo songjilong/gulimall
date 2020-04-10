@@ -41,7 +41,7 @@ public class AttrEntity implements Serializable {
 	 */
 	private String valueSelect;
 	/**
-	 * 属性类型[0-销售属性，1-基本属性，2-既是销售属性又是基本属性]
+	 * 属性类型[0-销售属性，1-基本属性]
 	 */
 	private Integer attrType;
 	/**
