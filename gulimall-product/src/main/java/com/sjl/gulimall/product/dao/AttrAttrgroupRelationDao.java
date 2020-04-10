@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * 属性&属性分组关联
- * 
+ *
  * @author songjilong
  * @email 2606587750@qq.com
  * @date 2020-04-01 23:18:20
@@ -20,6 +20,7 @@ public interface AttrAttrgroupRelationDao extends BaseMapper<AttrAttrgroupRelati
 
     /**
      * 批量删除属性与属性分组关联数据
+     *
      * @param vos
      */
     void deleteBatchRelation(@Param("vos") List<AttrRelationVo> vos);

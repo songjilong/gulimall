@@ -42,4 +42,14 @@ public class AttrAttrgroupRelationServiceImpl extends ServiceImpl<AttrAttrgroupR
         relationDao.deleteBatchRelation(Arrays.asList(vos));
     }
 
+    @Override
+    public void addRelation(AttrRelationVo[] vos) {
+        List<AttrAttrgroupRelationEntity> relationEntityList = Arrays.asList(vos).stream().map(vo -> {
+            AttrAttrgroupRelationEntity relationEntity = new AttrAttrgroupRelationEntity();
+            BeanUtils.copyProperties(vo, relationEntity);
+            return relationEntity;
+        }).collect(Collectors.toList());
+        this.saveBatch(relationEntityList);
+    }
+
 }

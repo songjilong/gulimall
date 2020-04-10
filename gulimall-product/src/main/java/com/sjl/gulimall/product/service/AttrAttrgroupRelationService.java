@@ -23,5 +23,11 @@ public interface AttrAttrgroupRelationService extends IService<AttrAttrgroupRela
      * @param vos
      */
     void deleteAttrGroupRelation(AttrRelationVo[] vos);
+
+    /**
+     * 添加属性与分组的关联关系
+     * @param vos
+     */
+    void addRelation(AttrRelationVo[] vos);
 }
 
