@@ -3,6 +3,7 @@ package com.sjl.gulimall.product.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.sjl.common.utils.PageUtils;
 import com.sjl.gulimall.product.entity.AttrAttrgroupRelationEntity;
+import com.sjl.gulimall.product.vo.AttrRelationVo;
 
 import java.util.Map;
 
@@ -16,5 +17,11 @@ import java.util.Map;
 public interface AttrAttrgroupRelationService extends IService<AttrAttrgroupRelationEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    /**
+     * 批量删除属性与属性分组关联数据
+     * @param vos
+     */
+    void deleteAttrGroupRelation(AttrRelationVo[] vos);
 }
 

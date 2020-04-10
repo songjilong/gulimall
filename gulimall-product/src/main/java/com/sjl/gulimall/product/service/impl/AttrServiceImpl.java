@@ -15,6 +15,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -40,6 +41,8 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
     private CategoryService categoryService;
     @Autowired
     private AttrGroupService attrGroupService;
+    @Autowired
+    private AttrService attrService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -141,6 +144,17 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
             attrAttrgroupRelationEntity.setAttrGroupId(attrVo.getAttrGroupId());
             attrAttrgroupRelationService.update(attrAttrgroupRelationEntity, new UpdateWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", attrVo.getAttrId()));
         }
+    }
+
+    @Override
+    public List<AttrEntity> getAttrGroupRelation(Long attrGroupId) {
+        List<AttrAttrgroupRelationEntity> relationEntities = attrAttrgroupRelationService.list(
+                new QueryWrapper<AttrAttrgroupRelationEntity>()
+                        .eq("attr_group_id", attrGroupId));
+        List<Long> ids = relationEntities.stream()
+                .map(AttrAttrgroupRelationEntity::getAttrId)
+                .collect(Collectors.toList());
+        return (List<AttrEntity>) attrService.listByIds(ids);
     }
 
 }
