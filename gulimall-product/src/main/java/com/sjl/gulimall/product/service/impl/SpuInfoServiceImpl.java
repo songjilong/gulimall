@@ -166,7 +166,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                 SkuReductionTo skuReductionTo = new SkuReductionTo();
                 skuReductionTo.setSkuId(skuId);
                 BeanUtils.copyProperties(sku, skuReductionTo);
-                if(skuReductionTo.getFullCount() > 0 || skuReductionTo.getFullPrice().compareTo(new BigDecimal(0)) == 1){
+                if (skuReductionTo.getFullCount() > 0 || skuReductionTo.getFullPrice().compareTo(new BigDecimal(0)) == 1) {
                     R r2 = couponFeignService.saveSkuReduction(skuReductionTo);
                     if (r2.getCode() != 0) {
                         log.error("保存sku优惠、满减等信息出错");
@@ -179,6 +179,30 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     @Override
     public void saveBaseSpuInfo(SpuInfoEntity spuInfoEntity) {
         this.baseMapper.insert(spuInfoEntity);
+    }
+
+    @Override
+    public PageUtils queryPageByCondition(Map<String, Object> params) {
+        QueryWrapper<SpuInfoEntity> queryWrapper = new QueryWrapper<>();
+        String key = (String) params.get("key");
+        if (StringUtils.isNotBlank(key)) {
+            queryWrapper.and(wrapper -> wrapper.eq("id", key).or().like("spu_name", key));
+        }
+        String catelogId = (String) params.get("catelogId");
+        if (StringUtils.isNotBlank(catelogId) && !"0".equalsIgnoreCase(catelogId)) {
+            queryWrapper.eq("catalog_id", catelogId);
+        }
+        String brandId = (String) params.get("brandId");
+        if (StringUtils.isNotBlank(brandId) && !"0".equalsIgnoreCase(brandId)) {
+            queryWrapper.eq("brand_id", brandId);
+        }
+        String status = (String) params.get("status");
+        if (StringUtils.isNotBlank(status)) {
+            queryWrapper.eq("publish_status", status);
+        }
+        IPage<SpuInfoEntity> page = this.page(
+                new Query<SpuInfoEntity>().getPage(params), queryWrapper);
+        return new PageUtils(page);
     }
 
 }
