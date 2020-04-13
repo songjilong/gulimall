@@ -1,7 +1,12 @@
 package com.sjl.gulimall.product.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -24,6 +29,14 @@ public class SpuImagesServiceImpl extends ServiceImpl<SpuImagesDao, SpuImagesEnt
         );
 
         return new PageUtils(page);
+    }
+
+    @Override
+    public void saveSpuImages(List<SpuImagesEntity> spuImagesList) {
+        if(spuImagesList == null || spuImagesList.size() == 0){
+            return;
+        }
+        this.saveBatch(spuImagesList);
     }
 
 }

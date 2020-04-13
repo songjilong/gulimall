@@ -36,8 +36,4 @@ class GulimallProductApplicationTests {
         List<BrandEntity> list = brandService.list(new QueryWrapper<BrandEntity>().eq("brand_id", 1));
         list.forEach(System.out::println);
     }
-
-
-
-
 }
