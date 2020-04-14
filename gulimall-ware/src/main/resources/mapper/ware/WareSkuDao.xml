@@ -13,5 +13,11 @@
         <result property="stockLocked" column="stock_locked"/>
     </resultMap>
 
+    <!--商品入库-->
+    <insert id="addStock">
+        update wms_ware_sku
+        set stock = stock + #{skuNum}
+        where sku_id = #{skuId} and ware_id = #{wareId}
+    </insert>
 
 </mapper>
