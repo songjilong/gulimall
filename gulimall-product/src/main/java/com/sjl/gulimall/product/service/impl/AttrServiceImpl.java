@@ -3,12 +3,8 @@ package com.sjl.gulimall.product.service.impl;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sjl.common.constant.ProductConstant;
-import com.sjl.gulimall.product.entity.AttrAttrgroupRelationEntity;
-import com.sjl.gulimall.product.entity.AttrGroupEntity;
-import com.sjl.gulimall.product.entity.CategoryEntity;
-import com.sjl.gulimall.product.service.AttrAttrgroupRelationService;
-import com.sjl.gulimall.product.service.AttrGroupService;
-import com.sjl.gulimall.product.service.CategoryService;
+import com.sjl.gulimall.product.entity.*;
+import com.sjl.gulimall.product.service.*;
 import com.sjl.gulimall.product.vo.AttrRespVo;
 import com.sjl.gulimall.product.vo.AttrVo;
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.PrimitiveIterator;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -28,8 +25,6 @@ import com.sjl.common.utils.PageUtils;
 import com.sjl.common.utils.Query;
 
 import com.sjl.gulimall.product.dao.AttrDao;
-import com.sjl.gulimall.product.entity.AttrEntity;
-import com.sjl.gulimall.product.service.AttrService;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -44,6 +39,8 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
     private AttrGroupService attrGroupService;
     @Autowired
     private AttrService attrService;
+    @Autowired
+    private ProductAttrValueService productAttrValueService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -187,6 +184,21 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         //设置分页信息
         IPage<AttrEntity> page = this.page(new Query<AttrEntity>().getPage(params), queryWrapper);
         return new PageUtils(page);
+    }
+
+    @Override
+    public List<ProductAttrValueEntity> listAttrValueForSpu(Long spuId) {
+        return productAttrValueService.list(new QueryWrapper<ProductAttrValueEntity>().eq("spu_id", spuId));
+    }
+
+    @Transactional
+    @Override
+    public void updateAttrValueBySpuId(Long spuId, List<ProductAttrValueEntity> attrValues) {
+        //删除spuid下的所有属性
+        productAttrValueService.remove(new QueryWrapper<ProductAttrValueEntity>().eq("spu_id", spuId));
+        //添加属性
+        attrValues.forEach(attrValue -> attrValue.setSpuId(spuId));
+        productAttrValueService.saveBaseAttrs(attrValues);
     }
 
 }

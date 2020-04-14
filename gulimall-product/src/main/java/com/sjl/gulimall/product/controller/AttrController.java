@@ -1,8 +1,11 @@
 package com.sjl.gulimall.product.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
+import com.sjl.gulimall.product.entity.ProductAttrValueEntity;
+import com.sjl.gulimall.product.entity.SpuInfoEntity;
 import com.sjl.gulimall.product.vo.AttrRespVo;
 import com.sjl.gulimall.product.vo.AttrVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +33,27 @@ import com.sjl.common.utils.R;
 public class AttrController {
     @Autowired
     private AttrService attrService;
+
+    /**
+     * 更新spu属性
+     */
+    @RequestMapping("/update/{spuId}")
+    public R updateAttrValueBySpuId(@PathVariable("spuId") Long spuId,
+                                    @RequestBody List<ProductAttrValueEntity> attrValues) {
+        attrService.updateAttrValueBySpuId(spuId, attrValues);
+
+        return R.ok();
+    }
+
+    /**
+     * 获取spu属性
+     */
+    @RequestMapping("/base/listforspu/{spuId}")
+    public R listAttrValueForSpu(@PathVariable("spuId") Long spuId) {
+        List<ProductAttrValueEntity> spuInfo = attrService.listAttrValueForSpu(spuId);
+
+        return R.ok().put("data", spuInfo);
+    }
 
     /**
      * 根据分类获取属性
