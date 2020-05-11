@@ -12,10 +12,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.PrimitiveIterator;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -53,7 +50,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void saveAttr(AttrVo attrVo) {
         AttrEntity attrEntity = new AttrEntity();
         BeanUtils.copyProperties(attrVo, attrEntity);
@@ -130,7 +127,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateAttr(AttrVo attrVo) {
         AttrEntity attrEntity = new AttrEntity();
         BeanUtils.copyProperties(attrVo, attrEntity);
@@ -191,7 +188,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         return productAttrValueService.list(new QueryWrapper<ProductAttrValueEntity>().eq("spu_id", spuId));
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void updateAttrValueBySpuId(Long spuId, List<ProductAttrValueEntity> attrValues) {
         //删除spuid下的所有属性
@@ -199,6 +196,15 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         //添加属性
         attrValues.forEach(attrValue -> attrValue.setSpuId(spuId));
         productAttrValueService.saveBaseAttrs(attrValues);
+    }
+
+    @Override
+    public List<Long> querySearchAttrIds(List<Long> attrIds) {
+        Collection<AttrEntity> attrs = listByIds(attrIds);
+        return attrs.stream()
+                .filter(attr -> attr.getSearchType() == 1)
+                .map(attr -> attr.getAttrId())
+                .collect(Collectors.toList());
     }
 
 }

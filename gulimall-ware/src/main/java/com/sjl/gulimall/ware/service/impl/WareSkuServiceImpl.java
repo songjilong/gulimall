@@ -1,6 +1,8 @@
 package com.sjl.gulimall.ware.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.sjl.common.to.SkuHasStockTo;
+import com.sjl.common.to.SkuReductionTo;
 import com.sjl.common.utils.R;
 import com.sjl.gulimall.ware.feign.ProductFeignService;
 import org.apache.commons.lang3.StringUtils;
@@ -9,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -78,4 +82,14 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
         }
     }
 
+    @Override
+    public List<SkuHasStockTo> getSkuHasStock(List<Long> skuIds) {
+        return skuIds.stream().map(skuId -> {
+            SkuHasStockTo to = new SkuHasStockTo();
+            Long stock = this.baseMapper.countStock(skuId);
+            to.setSkuId(skuId);
+            to.setHasStock(stock > 0);
+            return to;
+        }).collect(Collectors.toList());
+    }
 }
