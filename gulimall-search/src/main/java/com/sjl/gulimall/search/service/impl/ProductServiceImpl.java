@@ -45,11 +45,13 @@ public class ProductServiceImpl implements ProductService {
         }
         //响应数据
         BulkResponse bulkResponse = esClient.bulk(bulkRequest, GulimallElasticsearchConfig.COMMON_OPTIONS);
-        boolean b = bulkResponse.hasFailures();
-        if(!b){
+        if (bulkResponse.hasFailures()) {
+            log.info("商品上架失败，message：{}", bulkResponse.buildFailureMessage());
+            return false;
+        } else {
             List<String> ids = Arrays.stream(bulkResponse.getItems()).map(BulkItemResponse::getId).collect(Collectors.toList());
-            log.error("商品上架出错，ids：{}", ids);
+            log.info("商品上架完成，ids：{}", ids);
+            return true;
         }
-        return b;
     }
 }
