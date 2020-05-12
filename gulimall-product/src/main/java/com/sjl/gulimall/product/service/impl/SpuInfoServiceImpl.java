@@ -1,5 +1,6 @@
 package com.sjl.gulimall.product.service.impl;
 
+import com.alibaba.fastjson.TypeReference;
 import com.sjl.common.constant.ProductConstant;
 import com.sjl.common.to.SkuHasStockTo;
 import com.sjl.common.to.SkuReductionTo;
@@ -244,9 +245,9 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         Map<Long, Boolean> stockMap = null;
         try {
             //2、远程调用ware的方法
-            R<List<SkuHasStockTo>> skuHasStock = wareFeignService.getSkuHasStock(skuIds);
+            R skuHasStock = wareFeignService.getSkuHasStock(skuIds);
             //3、讲结果封装为map
-            stockMap = skuHasStock.getData().stream().collect(Collectors.toMap(SkuHasStockTo::getSkuId, SkuHasStockTo::getHasStock));
+            stockMap = skuHasStock.getData(new TypeReference<List<SkuHasStockTo>>(){}).stream().collect(Collectors.toMap(SkuHasStockTo::getSkuId, SkuHasStockTo::getHasStock));
         }catch (Exception e){
             log.error("远程调用仓储服务出错：{}", e);
         }
