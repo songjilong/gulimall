@@ -18,6 +18,8 @@ spring:
         endpoint: oss-cn-hangzhou.aliyuncs.com
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
+  thymeleaf:
+    cache: false
 
 mybatis-plus:
   mapper-locations: classpath:/mapper/**/*.xml
@@ -26,6 +28,7 @@ mybatis-plus:
       id-type: auto
       logic-delete-value: 0
       logic-not-delete-value: 1
+
 logging:
   level:
     com:
