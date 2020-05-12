@@ -1,4 +1,4 @@
-package com.sjl.gulimall.product.controller;
+package com.sjl.gulimall.product.app;
 
 import com.sjl.common.utils.PageUtils;
 import com.sjl.common.utils.R;
@@ -8,13 +8,10 @@ import com.sjl.common.valid.UpdateStatusGroup;
 import com.sjl.gulimall.product.entity.BrandEntity;
 import com.sjl.gulimall.product.service.BrandService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
 

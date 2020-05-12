@@ -1,4 +1,4 @@
-package com.sjl.gulimall.product.controller;
+package com.sjl.gulimall.product.app;
 
 import java.util.Arrays;
 import java.util.List;
@@ -6,9 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.sjl.gulimall.product.entity.AttrAttrgroupRelationEntity;
 import com.sjl.gulimall.product.entity.BrandEntity;
-import com.sjl.gulimall.product.entity.CategoryEntity;
 import com.sjl.gulimall.product.vo.BrandVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
