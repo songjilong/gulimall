@@ -1,26 +1,21 @@
 package com.sjl.gulimall.product.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.sjl.gulimall.product.entity.CategoryBrandRelationEntity;
-import com.sjl.gulimall.product.service.CategoryBrandRelationService;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sjl.common.utils.PageUtils;
 import com.sjl.common.utils.Query;
-
 import com.sjl.gulimall.product.dao.CategoryDao;
 import com.sjl.gulimall.product.entity.CategoryEntity;
+import com.sjl.gulimall.product.service.CategoryBrandRelationService;
 import com.sjl.gulimall.product.service.CategoryService;
+import com.sjl.gulimall.product.vo.Catalog2Vo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sun.rmi.runtime.Log;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service("categoryService")
@@ -80,11 +75,43 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateCascade(CategoryEntity category) {
         this.updateById(category);
         //TODO 更新关联表的信息
         categoryBrandRelationService.updateCategory(category.getCatId(), category.getName());
+    }
+
+    @Override
+    public List<CategoryEntity> getLevel1Categories() {
+        return this.baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("cat_level", 1));
+    }
+
+    /**
+     * 查出所有一级分类下的子分类数据
+     * key：一级分类id   value：子分类数据
+     */
+    @Override
+    public Map<String, List<Catalog2Vo>> getCatalogJson() {
+        //获取所有的一级分类
+        List<CategoryEntity> level1Categories = getLevel1Categories();
+        //封装一级分类信息
+        return level1Categories.stream().collect(Collectors.toMap(k -> k.getCatId().toString(), v -> {
+            //查询一级分类下的所有二级分类信息
+            List<CategoryEntity> level2Categories =
+                    this.baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", v.getCatId()));
+
+            return level2Categories.stream().map(l2 -> {
+                //查询二级分类下的所有三级分类信息
+                List<CategoryEntity> level3Categories = this.baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", l2.getCatId()));
+                //封装三级分类信息
+                List<Catalog2Vo.Catalog3Vo> collect = level3Categories.stream()
+                        .map(l3 -> new Catalog2Vo.Catalog3Vo(l2.getCatId().toString(), l3.getCatId().toString(), l3.getName()))
+                        .collect(Collectors.toList());
+                //封装二级分类信息
+                return new Catalog2Vo(v.getCatId().toString(), l2.getCatId().toString(), l2.getName(), collect);
+            }).collect(Collectors.toList());
+        }));
     }
 
     /**
