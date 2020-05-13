@@ -1,5 +1,7 @@
 package com.sjl.gulimall.product.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -11,8 +13,10 @@ import com.sjl.gulimall.product.service.CategoryBrandRelationService;
 import com.sjl.gulimall.product.service.CategoryService;
 import com.sjl.gulimall.product.vo.Catalog2Vo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,6 +27,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     @Autowired
     private CategoryBrandRelationService categoryBrandRelationService;
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -36,6 +42,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     /**
      * 查出所有分类及其子分类，以树形结构组装起来
+     *
      * @return 查询结果
      */
     @Override
@@ -52,6 +59,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     /**
      * 批量删除
+     *
      * @param asList
      */
     @Override
@@ -64,6 +72,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     /**
      * 找到指定分类id的完整三级分类路径 [父、子、孙]
      * e.g.[2, 25, 225]
+     *
      * @param catelogId 当前id
      * @return 完整路径
      */
@@ -87,12 +96,22 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         return this.baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("cat_level", 1));
     }
 
-    /**
-     * 查出所有一级分类下的子分类数据
-     * key：一级分类id   value：子分类数据
-     */
     @Override
     public Map<String, List<Catalog2Vo>> getCatalogJson() {
+        String catalogJson = redisTemplate.opsForValue().get("catalogJson");
+        if (StringUtils.isEmpty(catalogJson)) {
+            Map<String, List<Catalog2Vo>> catalogJsonForDb = getCatalogJsonForDb();
+            redisTemplate.opsForValue().set("catalogJson", JSON.toJSONString(catalogJsonForDb));
+            return catalogJsonForDb;
+        }
+        return JSON.parseObject(catalogJson, new TypeReference<Map<String, List<Catalog2Vo>>>(){});
+    }
+
+    /**
+     * 从数据库中查出所有一级分类下的子分类数据
+     * key：一级分类id   value：子分类数据
+     */
+    public Map<String, List<Catalog2Vo>> getCatalogJsonForDb() {
         //查询出所有分类信息，只查询一次数据库，就可以获取需要的数据
         List<CategoryEntity> selectList = this.baseMapper.selectList(null);
         //获取所有的一级分类
@@ -123,14 +142,15 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     /**
      * 递归查找当前分类id的父id
+     *
      * @param catelogId 当前id
-     * @param list 存储结果的集合
+     * @param list      存储结果的集合
      * @return 完整路径的倒序
      */
-    private List<Long> getCatelogPath(Long catelogId, List<Long> list){
+    private List<Long> getCatelogPath(Long catelogId, List<Long> list) {
         list.add(catelogId);
         CategoryEntity ce = this.getById(catelogId);
-        if(ce.getParentCid() != 0){
+        if (ce.getParentCid() != 0) {
             getCatelogPath(ce.getParentCid(), list);
         }
         return list;
@@ -138,11 +158,12 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     /**
      * 递归查询出所有菜单的子分类
+     *
      * @param root 父分类
-     * @param all 所有的数据
+     * @param all  所有的数据
      * @return 查询结果
      */
-    private List<CategoryEntity> getChildren(CategoryEntity root, List<CategoryEntity> all){
+    private List<CategoryEntity> getChildren(CategoryEntity root, List<CategoryEntity> all) {
         return all.stream()
                 .filter(c -> c.getParentCid().equals(root.getCatId()))
                 .peek(c -> c.setChildren(getChildren(c, all)))
