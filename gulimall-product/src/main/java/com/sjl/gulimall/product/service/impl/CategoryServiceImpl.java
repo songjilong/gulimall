@@ -93,17 +93,17 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
      */
     @Override
     public Map<String, List<Catalog2Vo>> getCatalogJson() {
+        //查询出所有分类信息，只查询一次数据库，就可以获取需要的数据
+        List<CategoryEntity> selectList = this.baseMapper.selectList(null);
         //获取所有的一级分类
         List<CategoryEntity> level1Categories = getLevel1Categories();
         //封装一级分类信息
         return level1Categories.stream().collect(Collectors.toMap(k -> k.getCatId().toString(), v -> {
             //查询一级分类下的所有二级分类信息
-            List<CategoryEntity> level2Categories =
-                    this.baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", v.getCatId()));
-
+            List<CategoryEntity> level2Categories = getListByParentCid(selectList, v.getCatId());
             return level2Categories.stream().map(l2 -> {
                 //查询二级分类下的所有三级分类信息
-                List<CategoryEntity> level3Categories = this.baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", l2.getCatId()));
+                List<CategoryEntity> level3Categories = getListByParentCid(selectList, l2.getCatId());
                 //封装三级分类信息
                 List<Catalog2Vo.Catalog3Vo> collect = level3Categories.stream()
                         .map(l3 -> new Catalog2Vo.Catalog3Vo(l2.getCatId().toString(), l3.getCatId().toString(), l3.getName()))
@@ -112,6 +112,13 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
                 return new Catalog2Vo(v.getCatId().toString(), l2.getCatId().toString(), l2.getName(), collect);
             }).collect(Collectors.toList());
         }));
+    }
+
+    /**
+     * 根据父id查询每个分类的数据
+     */
+    private List<CategoryEntity> getListByParentCid(List<CategoryEntity> selectList, Long parentCid) {
+        return selectList.stream().filter(item -> item.getParentCid().equals(parentCid)).collect(Collectors.toList());
     }
 
     /**
