@@ -108,7 +108,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         categoryBrandRelationService.updateCategory(category.getCatId(), category.getName());
     }
 
-    @Cacheable(cacheNames = {"category"}, key = "#root.methodName")
+    @Cacheable(cacheNames = {"category"}, key = "#root.methodName", sync = true)
     @Override
     public List<CategoryEntity> getLevel1Categories() {
         System.out.println("getLevel1Categories...");
