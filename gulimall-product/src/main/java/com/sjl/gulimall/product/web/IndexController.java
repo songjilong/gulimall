@@ -32,7 +32,6 @@ public class IndexController {
     public String index(Model model) {
         //查询一级分类
         List<CategoryEntity> level1Categories = categoryService.getLevel1Categories();
-
         model.addAttribute("categories1", level1Categories);
         return "index";
     }
