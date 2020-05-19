@@ -7,7 +7,8 @@ spring:
         server-addr: 127.0.0.1:8848
     gateway:
       routes:
-# http://localhost:88/api/product/category/list/tree => http://localhost:10000/product/category/list/tree
+        # http://localhost:88/api/product/category/list/tree
+        # => http://localhost:10000/product/category/list/tree
         - id: product_route
           uri: lb://gulimall-product
           predicates:
@@ -46,4 +47,9 @@ spring:
         - id: gulimall_host_route
           uri: lb://gulimall-product
           predicates:
-            - Host=**.gulimall.com
+            - Host=gulimall.com
+
+        - id: gulimall_search_route
+          uri: lb://gulimall-search
+          predicates:
+            - Host=search.gulimall.com
