@@ -1,6 +1,7 @@
 package com.sjl.gulimall.search.service;
 
 import com.sjl.gulimall.search.vo.SearchParam;
+import com.sjl.gulimall.search.vo.SearchResult;
 
 /**
  * @author songjilong
@@ -8,5 +9,5 @@ import com.sjl.gulimall.search.vo.SearchParam;
  */
 public interface MallSearchService {
 
-    Object search(SearchParam param);
+    SearchResult search(SearchParam param);
 }

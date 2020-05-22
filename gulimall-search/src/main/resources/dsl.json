@@ -21,6 +21,15 @@
           }
         },
         {
+          "terms": {
+            "brandId": [
+              1,
+              12,
+              13
+            ]
+          }
+        },
+        {
           "range": {
             "skuPrice": {
               "gte": 4000,
@@ -29,12 +38,28 @@
           }
         },
         {
-          "terms": {
-            "brandId": [
-              1,
-              12,
-              13
-            ]
+          "nested": {
+            "path": "attrs",
+            "query": {
+              "bool": {
+                "must": [
+                  {
+                    "term": {
+                      "attrs.attrId": {
+                        "value": "21"
+                      }
+                    }
+                  },
+                  {
+                    "term": {
+                      "attrs.attrValue": {
+                        "value": "TAS-AN03"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
           }
         }
       ]
@@ -49,6 +74,14 @@
   ],
   "from": 0,
   "size": 10,
+  "highlight": {
+    "fields": {
+      "_all": {
+        "pre_tags": ["<em>"], "post_tags": ["</em>"]
+      },
+      "skuTitle": "华为"
+    }
+  },
   "aggs": {
     "brand_agg": {
       "terms": {
