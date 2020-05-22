@@ -84,12 +84,12 @@ public class MallSearchServiceImpl implements MallSearchService {
              */
             String[] s = skuPrice.split("_");
             if (s.length == 2) {
-                rangeQuery.lte(s[0]).gte(s[1]);
+                rangeQuery.gte(s[0]).lte(s[1]);
             } else {
                 if (skuPrice.startsWith("_")) {
-                    rangeQuery.gte(s[0]);
-                } else if (skuPrice.endsWith("_")) {
                     rangeQuery.lte(s[0]);
+                } else if (skuPrice.endsWith("_")) {
+                    rangeQuery.gte(s[0]);
                 }
             }
             boolQuery.filter(rangeQuery);
@@ -139,6 +139,9 @@ public class MallSearchServiceImpl implements MallSearchService {
             highlightBuilder.field("skuTitle").preTags("<em>").postTags("</em>");
             source.highlighter(highlightBuilder);
         }
+        System.out.println("DSL语句：" + source.toString());
+        //========聚合========
+
         return new SearchRequest(new String[]{"gulimall_product"}, source);
     }
 

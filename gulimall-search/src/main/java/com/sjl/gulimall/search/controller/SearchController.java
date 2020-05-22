@@ -9,8 +9,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.List;
-
 /**
  * @author songjilong
  * @date 2020/5/19 21:51
@@ -22,7 +20,7 @@ public class SearchController {
     private MallSearchService mallSearchService;
 
     @GetMapping("/list.html")
-    public String list(@RequestBody SearchParam param, Model model) {
+    public String list(SearchParam param, Model model) {
         SearchResult result = mallSearchService.search(param);
         model.addAttribute("result", result);
         return "list";
