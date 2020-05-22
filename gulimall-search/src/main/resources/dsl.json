@@ -76,11 +76,10 @@
   "size": 10,
   "highlight": {
     "fields": {
-      "_all": {
-        "pre_tags": ["<em>"], "post_tags": ["</em>"]
-      },
-      "skuTitle": "华为"
-    }
+      "skuTitle": {}
+    },
+    "pre_tags": "<em>",
+    "post_tags": "</em>"
   },
   "aggs": {
     "brand_agg": {

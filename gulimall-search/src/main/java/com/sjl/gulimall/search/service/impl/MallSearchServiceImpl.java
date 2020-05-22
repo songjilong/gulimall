@@ -114,6 +114,31 @@ public class MallSearchServiceImpl implements MallSearchService {
             }
         }
         source.query(boolQuery);
+        //========排序、分页、高亮========
+        //排序
+        String sortStr = param.getSort();
+        if (StringUtils.isNotBlank(sortStr)) {
+            /*
+             * 规则：
+             * sort=saleCount_asc/desc
+             * sort=skuPrice_asc/desc
+             * sort=hotScore_asc/desc
+             */
+            String[] s = sortStr.split("_");
+            FieldSortBuilder sort = SortBuilders.fieldSort(s[0]);
+            sort.order(StringUtils.equalsIgnoreCase(s[1], "asc") ? SortOrder.ASC : SortOrder.DESC);
+            source.sort(sort);
+        }
+        //分页
+        Integer pageNum = param.getPageNum();
+        source.from((pageNum - 1) * EsConstant.PRODUCT_PAGE_SIZE);
+        source.size(EsConstant.PRODUCT_PAGE_SIZE);
+        //高亮
+        if (StringUtils.isNotBlank(param.getKeyword())) {
+            HighlightBuilder highlightBuilder = new HighlightBuilder();
+            highlightBuilder.field("skuTitle").preTags("<em>").postTags("</em>");
+            source.highlighter(highlightBuilder);
+        }
         return new SearchRequest(new String[]{"gulimall_product"}, source);
     }
 
