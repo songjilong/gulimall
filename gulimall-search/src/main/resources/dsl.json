@@ -125,18 +125,22 @@
           "terms": {
             "field": "attrs.attrId",
             "size": 10
-          }
-        },
-        "attr_name_agg": {
-          "terms": {
-            "field": "attrs.attrName",
-            "size": 10
-          }
-        },
-        "attr_value_agg": {
-          "terms": {
-            "field": "attrs.attrValue",
-            "size": 10
+          },
+          "aggs": {
+            "attr_name_agg": {
+              "terms": {
+                "field": "attrs.attrName",
+                "size": 10
+              },
+              "aggs": {
+                "attr_value_agg": {
+                  "terms": {
+                    "field": "attrs.attrValue",
+                    "size": 10
+                  }
+                }
+              }
+            }
           }
         }
       }

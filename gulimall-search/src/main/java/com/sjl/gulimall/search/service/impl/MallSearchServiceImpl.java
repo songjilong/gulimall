@@ -1,5 +1,6 @@
 package com.sjl.gulimall.search.service.impl;
 
+import com.fasterxml.jackson.databind.util.ArrayBuilders;
 import com.sjl.gulimall.search.config.GulimallElasticsearchConfig;
 import com.sjl.gulimall.search.constant.EsConstant;
 import com.sjl.gulimall.search.service.MallSearchService;
@@ -12,6 +13,9 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.*;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.nested.NestedAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
@@ -51,12 +55,11 @@ public class MallSearchServiceImpl implements MallSearchService {
 
     /**
      * 构建检索请求
-     *
-     * @return
      */
     private SearchRequest buildSearchRequest(SearchParam param) {
         SearchSourceBuilder source = new SearchSourceBuilder();
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+
         //========查询========
         //关键字模糊匹配
         if (StringUtils.isNotBlank(param.getKeyword())) {
@@ -114,6 +117,7 @@ public class MallSearchServiceImpl implements MallSearchService {
             }
         }
         source.query(boolQuery);
+
         //========排序、分页、高亮========
         //排序
         String sortStr = param.getSort();
@@ -139,9 +143,26 @@ public class MallSearchServiceImpl implements MallSearchService {
             highlightBuilder.field("skuTitle").preTags("<em>").postTags("</em>");
             source.highlighter(highlightBuilder);
         }
-        System.out.println("DSL语句：" + source.toString());
-        //========聚合========
 
+        //========聚合========
+        //品牌聚合
+        TermsAggregationBuilder brand_agg = AggregationBuilders.terms("brand_agg").field("brandId").size(50);
+        brand_agg.subAggregation(AggregationBuilders.terms("brand_name_agg").field("brandName").size(1));
+        brand_agg.subAggregation(AggregationBuilders.terms("brand_img_agg").field("brandImg").size(1));
+        source.aggregation(brand_agg);
+        //分类聚合
+        TermsAggregationBuilder catalog_agg = AggregationBuilders.terms("catalog_agg").field("catalogId").size(20);
+        catalog_agg.subAggregation(AggregationBuilders.terms("catalog_name_agg").field("catalogName").size(1));
+        source.aggregation(catalog_agg);
+        //属性聚合
+        NestedAggregationBuilder attrs_nested = AggregationBuilders.nested("nested", "attrs");
+        TermsAggregationBuilder attr_id_agg = AggregationBuilders.terms("attr_id_agg").field("attrs.attrId");
+        attr_id_agg.subAggregation(AggregationBuilders.terms("attr_name_agg").field("attrs.attrName").size(1));
+        attr_id_agg.subAggregation(AggregationBuilders.terms("attr_value_agg").field("attrs.attrValue").size(50));
+        attrs_nested.subAggregation(attr_id_agg);
+        source.aggregation(attrs_nested);
+
+        System.out.println("DSL语句：" + source.toString());
         return new SearchRequest(new String[]{"gulimall_product"}, source);
     }
 
